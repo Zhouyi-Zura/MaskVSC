@@ -27,9 +27,7 @@ cuda = True if torch.cuda.is_available() else False
 if cuda:
     generator = generator.cuda()
 
-transforms_ = [
-    transforms.ToTensor(),
-    ]
+transforms_ = [transforms.ToTensor(),]
 
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
