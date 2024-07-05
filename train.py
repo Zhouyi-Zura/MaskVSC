@@ -33,9 +33,7 @@ test_path  = os.path.join("./Data",opt.data_type,opt.data_name,"Test/")
 generator = UNet(n_channels=3, n_classes=1)
 # generator = CSNet(n_channels=3, n_classes=1)
 # generator = SwinUnet()
-
 initialize_weights(generator)
-
 criterion_BCE = nn.BCELoss()
 criterion_Con = Connect_Loss()
 
@@ -44,13 +42,9 @@ if cuda:
     generator = generator.cuda()
     criterion_BCE.cuda()
     criterion_Con.cuda()
-
+    
 optimizer = torch.optim.Adam(generator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
-
-transforms_ = [
-    transforms.ToTensor(),
-]
-
+transforms_ = [transforms.ToTensor(),]
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
 # ---Eval---
