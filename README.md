@@ -1,5 +1,4 @@
 # Masked Vascular Structure Completion in Retinal Images
----
 
 ## Overview
 
