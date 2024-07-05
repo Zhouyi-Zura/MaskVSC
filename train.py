@@ -47,6 +47,7 @@ optimizer = torch.optim.Adam(generator.parameters(), lr=opt.lr, betas=(opt.b1, o
 transforms_ = [transforms.ToTensor(),]
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
+
 # ---Eval---
 def Eval(test_path, test_save_path):
     test_dir = test_path + "image/"
