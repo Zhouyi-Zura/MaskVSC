@@ -1,12 +1,8 @@
 # Masked Vascular Structure Completion in Retinal Images
 
-## Overview
-
 <center>
 <img src="/Figure/Overview.jpg">
 </center>
-
-## Get Started
 
 Using the ```train.py``` and ```predict.py``` to train and test the model on your own dataset, respectively.
 
