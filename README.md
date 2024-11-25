@@ -1,4 +1,4 @@
-# Masked Vascular-structure Segmentation and Completion in Retinal Images
+# Masked Vascular Structure Segmentation and Completion in Retinal Images
 
 <center>
 <img src="/Figure/Overview.jpg">
