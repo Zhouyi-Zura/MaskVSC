@@ -1,4 +1,4 @@
-# Masked Vascular Structure Segmentation and Completion in Retinal Images
+# Masked Vascular-structure Segmentation and Completion in Retinal Images
 
 <center>
 <img src="/Figure/Overview.jpg">
@@ -6,9 +6,7 @@
 
 Using ```train.py``` and ```test.py``` to train and test the model on your own dataset, respectively.
 
-The two-photon fluorescence microscopy (2PFM) data is also available at this repo:\
-Raw image: /Data/2PFM/image \
-Ground truth: /Data/2PFM/label
+The two-photon fluorescence microscopy (2PFM) data is available at [Google Drive](https://drive.google.com/drive/folders/1P5QnvCcfKu9GDrVdlV1OCK7VMuQKoye8).
 
 ## Dataset, Bacbone, and Competing Method Links
 
