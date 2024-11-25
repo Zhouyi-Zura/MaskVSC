@@ -13,7 +13,7 @@ device_ids = [0]
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--save_path", type=str, default="./Results/", help="path of results after test")
-parser.add_argument("--data_type", type=str, default="Fundus", help="Fundus, OCTA")
+parser.add_argument("--data_type", type=str, default="Fundus", help="Fundus, OCTA, 2PFM")
 parser.add_argument("--data_name", type=str, default="DRIVE", help="DRIVE, STARE, ROSE1, OCTA500")
 opt = parser.parse_args()
 

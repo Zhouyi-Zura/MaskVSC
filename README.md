@@ -1,10 +1,14 @@
-# Masked Vascular Structure Completion in Retinal Images
+# Masked Vascular-structure Segmentation and Completion in Retinal Images
 
 <center>
 <img src="/Figure/Overview.jpg">
 </center>
 
-Using the ```train.py``` and ```predict.py``` to train and test the model on your own dataset, respectively.
+Using ```train.py``` and ```test.py``` to train and test the model on your own dataset, respectively.
+
+The two-photon fluorescence microscopy (2PFM) data is also available at this repo:\
+Raw image: /Data/2PFM/image \
+Ground truth: /Data/2PFM/label
 
 ## Dataset, Bacbone, and Competing Method Links
 
@@ -13,7 +17,9 @@ Using the ```train.py``` and ```predict.py``` to train and test the model on you
 | **STARE**        | **http://www.ces.clemson.edu/ahoover/stare/**             |
 | **ROSE**         | **https://imed.nimte.ac.cn/dataofrose.html**              |
 | **OCTA-500**     | **https://ieee-dataport.org/open-access/octa-500**        |
-| **CS$^2$-Net**   | **https://github.com/iMED-Lab/CS-Net**                    |
+| **RITE**         | **https://medicine.uiowa.edu/eye/rite-dataset**           |
+| **LES-AV**       | **https://figshare.com/articles/dataset/LES-AV_dataset/11857698**|
+| **$CS^2$-Net**   | **https://github.com/iMED-Lab/CS-Net**                    |
 | **Swin-Unet**    | **https://github.com/HuCaoFighting/Swin-Unet**            |
 | **clDice**       | **https://github.com/jocpae/clDice**                      |
 | **TopoLoss**     | **https://github.com/HuXiaoling/TopoLoss**                |

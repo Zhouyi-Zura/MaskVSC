@@ -8,8 +8,8 @@ from lib.datasets import *
 from lib.Loss import initialize_weights, Connect_Loss
 from lib.EvalMetric import cal_metrics_train, normalization
 from model.UNet import UNet
-from model.csnet import CSNet
-from model.vision_transformer import SwinUnet
+# from model.csnet import CSNet
+# from model.vision_transformer import SwinUnet
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 device_ids = [0]
@@ -18,11 +18,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--lr", type=float, default=0.0002, help="adam: learning rate")
 parser.add_argument("--b1", type=float, default=0.5, help="adam: decay of first order momentum of gradient")
 parser.add_argument("--b2", type=float, default=0.999, help="adam: decay of first order momentum of gradient")
-parser.add_argument("--n_cpu", type=int, default=0, help="number of cpu threads to use during batch generation")
+parser.add_argument("--n_cpu", type=int, default=8, help="number of cpu threads to use during batch generation")
 parser.add_argument("--batch_size", type=int, default=4, help="size of the batches")
 parser.add_argument("--n_epochs", type=int, default=200, help="number of epochs of training")
 parser.add_argument("--save_path", type=str, default="./Results/", help="path of results after test")
-parser.add_argument("--data_type", type=str, default="Fundus", help="Fundus, OCTA")
+parser.add_argument("--data_type", type=str, default="Fundus", help="Fundus, OCTA, 2PFM")
 parser.add_argument("--data_name", type=str, default="DRIVE", help="DRIVE, STARE, ROSE1, OCTA500")
 parser.add_argument('--mask_type', type=str, default="MaskVSC", help='MaskVSC, or None')
 opt = parser.parse_args()
@@ -120,6 +120,11 @@ def train():
                 ImageDataset_OCTA(train_path, transforms_=transforms_,
                                   mask_type=opt.mask_type, mask_ratio=curr_mask_ratio),
             batch_size=opt.batch_size, shuffle=True, num_workers=opt.n_cpu,)
+        elif opt.data_type == "2PFM":
+            train_dataloader = DataLoader(
+                ImageDataset_2PFM(train_path, transforms_=transforms_,
+                                  mask_type=opt.mask_type, mask_ratio=curr_mask_ratio),
+            batch_size=opt.batch_size, shuffle=True, num_workers=opt.n_cpu,)
         else:
             raise Exception("Invalid data type!", opt.data_type)
 
@@ -162,7 +167,7 @@ def train():
 
 
 if __name__ == "__main__":
-    seed = 0
+    seed = 1234
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
