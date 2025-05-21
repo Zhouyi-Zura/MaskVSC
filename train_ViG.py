@@ -10,6 +10,10 @@ from lib.EvalMetric import cal_metrics_train, normalization
 from model.UNet import UNet
 # from model.csnet import CSNet
 # from model.vision_transformer import SwinUnet
+from model.gcn import *
+
+import warnings
+warnings.filterwarnings("ignore") 
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 device_ids = [0]
@@ -24,26 +28,28 @@ parser.add_argument("--n_epochs", type=int, default=200, help="number of epochs 
 parser.add_argument("--save_path", type=str, default="./Results/", help="path of results after test")
 parser.add_argument("--data_type", type=str, default="Fundus", help="Fundus, OCTA, 2PFM")
 parser.add_argument("--data_name", type=str, default="DRIVE", help="DRIVE, STARE, ROSE1, OCTA500")
-parser.add_argument('--mask_type', type=str, default="MaskVSC", help='MaskVSC, or None')
 opt = parser.parse_args()
 
 train_path = os.path.join("./Data",opt.data_type,opt.data_name,"Train/")
 test_path  = os.path.join("./Data",opt.data_type,opt.data_name,"Test/")
 
-generator = UNet(n_channels=3, n_classes=1)
-# generator = CSNet(n_channels=3, n_classes=1)
-# generator = SwinUnet()
-initialize_weights(generator)
+Seg_model = UNet(n_channels=3, n_classes=1)
+# Seg_model = CSNet(channels=3, classes=1)
+# Seg_model = SwinUnet()
+
+GCN_model = ViGSeg_Fundus(img_size=512, patch_size=16)
+# GCN_model = ViGSeg_OCTA(img_size=304, patch_size=16)
+# GCN_model = ViGSeg_2PFM(img_size=1024, patch_size=16)
+initialize_weights(GCN_model)
 criterion_BCE = nn.BCELoss()
-criterion_Con = Connect_Loss()
 
 cuda = True if torch.cuda.is_available() else False
 if cuda:
-    generator = generator.cuda()
+    Seg_model = Seg_model.cuda()
+    GCN_model = GCN_model.cuda()
     criterion_BCE.cuda()
-    criterion_Con.cuda()
-    
-optimizer = torch.optim.Adam(generator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
+
+optimizer = torch.optim.Adam(GCN_model.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
 transforms_ = [transforms.ToTensor(),]
 Tensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 
@@ -55,10 +61,10 @@ def Eval(test_path, test_save_path):
     transform = transforms.Compose(transforms_)
     Eval_path = test_save_path + "Eval/"
 
-    for _,test_file in enumerate(test_files):
+    for i,test_file in enumerate(test_files):
         open_name = test_dir + test_file
-        save_name = test_save_path + "temp/" + test_file
-
+        save_name = test_save_path + "temp/" + test_file[:-4] + ".png"
+        
         # Fundus
         img = Image.open(open_name)
         img = np.array(img.resize([512,512]))
@@ -70,8 +76,10 @@ def Eval(test_path, test_save_path):
         img = (transform(img)).unsqueeze(0)
         img = Variable(img.type(Tensor))
 
-        pred = generator(img)
-        pred = pred.data.squeeze().cpu().numpy()
+        seg_pred = Seg_model(img)
+        pred_mask = GCN_model(seg_pred)
+
+        pred = pred_mask.data.squeeze().cpu().numpy()
         pred = normalization(np.array(pred))
         pred[pred>=0.5] = 1
         pred[pred<0.5] = 0
@@ -93,53 +101,38 @@ def Eval(test_path, test_save_path):
 
 
 # ---Training---
-def train():
+def train(best_seg_pretrain=None):
+    print("Load Segmentation Model: %s!" % best_seg_pretrain)
+    Seg_model.load_state_dict(torch.load(best_seg_pretrain))
+
     prev_time = time.time()
     best_dice = 0.0
 
-    for epoch in range(opt.n_epochs):
-        # ---Masking Ratio---
-        epoch_ratio = epoch/opt.n_epochs
-        if 0 <= epoch_ratio < 0.1 or 0.9 < epoch_ratio <= 1:
-            curr_mask_ratio = 0
-        elif 0.1 <= epoch_ratio <= 0.5:
-            curr_mask_ratio = 0.4 * (epoch_ratio - 0.1) / 0.4
-        elif 0.5 < epoch_ratio <= 0.9:
-            curr_mask_ratio = 0.4 * (0.9 - epoch_ratio) / 0.4
-        else:
-            raise Exception("Invalid epoch_ratio!", epoch_ratio)
-
+    for epoch in range(opt.n_epochs):        
         # ---Dataloader---
         if opt.data_type == "Fundus":
             train_dataloader = DataLoader(
-                ImageDataset_Fundus(train_path, transforms_=transforms_,
-                                  mask_type=opt.mask_type, mask_ratio=curr_mask_ratio),
-            batch_size=opt.batch_size, shuffle=True, num_workers=opt.n_cpu,)
+                ImageDataset_GCN_Fundus(train_path, transforms_=transforms_),
+                batch_size=opt.batch_size, shuffle=True, num_workers=opt.n_cpu,)
         elif opt.data_type == "OCTA":
             train_dataloader = DataLoader(
-                ImageDataset_OCTA(train_path, transforms_=transforms_,
-                                  mask_type=opt.mask_type, mask_ratio=curr_mask_ratio),
-            batch_size=opt.batch_size, shuffle=True, num_workers=opt.n_cpu,)
+                ImageDataset_GCN_OCTA(train_path, transforms_=transforms_),
+                batch_size=opt.batch_size, shuffle=True, num_workers=opt.n_cpu,)
         elif opt.data_type == "2PFM":
             train_dataloader = DataLoader(
-                ImageDataset_2PFM(train_path, transforms_=transforms_,
-                                  mask_type=opt.mask_type, mask_ratio=curr_mask_ratio),
-            batch_size=opt.batch_size, shuffle=True, num_workers=opt.n_cpu,)
+                ImageDataset_GCN_2PFM(train_path, transforms_=transforms_),
+                batch_size=opt.batch_size, shuffle=True, num_workers=opt.n_cpu,)
         else:
             raise Exception("Invalid data type!", opt.data_type)
-
-        # ---Training one epoch---
+        
         for i, batch in enumerate(train_dataloader):
             img = Variable(batch["image"].type(Tensor))
             lab = Variable(batch["label"].type(Tensor))
             
-            pred = generator(img)
-            
-            # ---Loss Function---
-            loss_BCE = criterion_BCE(pred, lab)
-            loss_Con = criterion_Con(pred, lab)
+            seg_pred = Seg_model(img)
+            pred = GCN_model(seg_pred)
 
-            loss = loss_BCE + loss_Con
+            loss = criterion_BCE(pred, lab)
 
             optimizer.zero_grad()
             loss.backward()
@@ -159,9 +152,9 @@ def train():
         Dice = Eval(test_path, opt.save_path)
         if Dice > best_dice and Dice > 0.5:
             best_dice = Dice
-            torch.save(generator.state_dict(), "./saved_models/Epo%d_%.4f.pth" % (epoch,best_dice))
-            print("\n============ Save model! ============")
-        
+            torch.save(GCN_model.state_dict(), "./saved_models/Epo%d_%.4f_GCN.pth" % (epoch,best_dice))
+            print("\n============ Save GCN model! ============")
+
         torch.cuda.empty_cache()
         gc.collect()
 
@@ -175,4 +168,5 @@ if __name__ == "__main__":
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
 
-    train()
+    train(best_seg_pretrain="SEG_MODEL_PTH")
+    
