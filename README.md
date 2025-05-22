@@ -27,7 +27,7 @@ Using ```train.py``` and ```test.py``` to train and test the Seg model on your o
 
 After the Seg model is trained, use ```train_ViG.py``` and ```test_ViG.py``` to train and test the ViG model.
 
-The two-photon fluorescence microscopy (2PFM) data is available at [Google Drive](https://drive.google.com/drive/folders/1P5QnvCcfKu9GDrVdlV1OCK7VMuQKoye8).
+The two-photon fluorescence microscopy (2PFM) data is available at [Figshare](https://figshare.com/articles/dataset/2PFM_dataset_from_MaskVSC/28203014).
 
 
 ## Dataset, Bacbone, and Competing Method Links
