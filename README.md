@@ -56,6 +56,9 @@ If you use this code for your research, please cite our papers.
   author={Zhou, Yi and Ahmed, Thiara Sana and Wang, Meng and Newman, Eric A. and Schmetterer, Leopold and Fu, Huazhu and Cheng, Jun and Tan, Bingyao},
   journal={IEEE Transactions on Medical Imaging},
   year={2025},
+  volume={44},
+  number={6},
+  pages={2492-2503},
   doi={10.1109/TMI.2025.3538336},
   publisher={IEEE}
 }
