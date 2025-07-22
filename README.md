@@ -51,7 +51,7 @@ The two-photon fluorescence microscopy (2PFM) data is available at [Figshare](ht
 ## Citation
 If you use this code for your research, please cite our papers. 
 ```
-@article{zhou2025masked:,
+@article{zhou2025masked,
   title={Masked Vascular Structure Segmentation and Completion in Retinal Images},
   author={Zhou, Yi and Ahmed, Thiara Sana and Wang, Meng and Newman, Eric A. and Schmetterer, Leopold and Fu, Huazhu and Cheng, Jun and Tan, Bingyao},
   journal={IEEE Transactions on Medical Imaging},
