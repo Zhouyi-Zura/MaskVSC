@@ -84,7 +84,6 @@ class ImageDataset_Fundus(Dataset):
         return len(self.image_files)
 
 
-
 class ImageDataset_OCTA(Dataset):
     def __init__(self, root, transforms_=None, mask_type="MaskVSC", mask_ratio=0.1):
         self.transform = transforms.Compose(transforms_)
@@ -143,7 +142,6 @@ class ImageDataset_OCTA(Dataset):
         return len(self.image_files)
 
 
-
 class ImageDataset_2PFM(Dataset):
     def __init__(self, root, transforms_=None, mask_type="MaskVSC", mask_ratio=0.1):
         self.transform = transforms.Compose(transforms_)
@@ -189,6 +187,160 @@ class ImageDataset_2PFM(Dataset):
         elif np.max(lab)==1:
             lab = (lab >= 0.5).astype(np.uint8)
 
+        img = self.transform(img)
+        lab = self.transform(lab)
+        
+        return {"image": img, "label": lab}
+
+    def __len__(self):
+        return len(self.image_files)
+
+
+class ImageDataset_GCN_Fundus(Dataset):
+    def __init__(self, root, transforms_=None):
+        self.transform = transforms.Compose(transforms_)
+        self.image_files = sorted(glob.glob(root + "/image/*.*"))
+        self.label_files = sorted(glob.glob(root + "/label/*.*"))
+
+    def __getitem__(self, index):
+        img = Image.open(self.image_files[index % len(self.image_files)])
+        lab = Image.open(self.label_files[index % len(self.label_files)]).convert("L")
+
+        # shape = 584,565 -> 512,512
+        img = np.array(img.resize([512,512]))
+        lab = np.array(lab.resize([512,512]))
+
+        img = self.transform(img)
+        lab = self.transform(lab)
+        
+        return {"image": img, "label": lab}
+
+    def __len__(self):
+        return len(self.image_files)
+
+
+class ImageDataset_GCN_OCTA(Dataset):
+    def __init__(self, root, transforms_=None):
+        self.transform = transforms.Compose(transforms_)
+        self.image_files = sorted(glob.glob(root + "/image/*.*"))
+        self.label_files = sorted(glob.glob(root + "/label/*.*"))
+
+    def __getitem__(self, index):
+        img = cv2.imread(self.image_files[index % len(self.image_files)], cv2.IMREAD_GRAYSCALE)
+        lab = cv2.imread(self.label_files[index % len(self.label_files)], cv2.IMREAD_GRAYSCALE)
+
+        # Shape resize
+        # For Swin-Unet
+        # img = cv2.resize(img, (224,224))
+        # lab = cv2.resize(lab, (224,224))
+        
+        # For OCTA500
+        # img = cv2.resize(img, (384,384))
+        # lab = cv2.resize(lab, (384,384))
+
+        img = self.transform(img)
+        lab = self.transform(lab)
+        
+        return {"image": img, "label": lab}
+
+    def __len__(self):
+        return len(self.image_files)
+
+
+class ImageDataset_GCN_2PFM(Dataset):
+    def __init__(self, root, transforms_=None):
+        self.transform = transforms.Compose(transforms_)
+        self.image_files = sorted(glob.glob(root + "/image/*.*"))
+        self.label_files = sorted(glob.glob(root + "/label/*.*"))
+
+    def __getitem__(self, index):
+        img = cv2.imread(self.image_files[index % len(self.image_files)], cv2.IMREAD_GRAYSCALE)
+        lab = cv2.imread(self.label_files[index % len(self.label_files)], cv2.IMREAD_GRAYSCALE)
+
+        # Shape resize
+        # For Swin-Unet
+        # img = cv2.resize(img, (224,224))
+        # lab = cv2.resize(lab, (224,224))
+        
+        img = self.transform(img)
+        lab = self.transform(lab)
+        
+        return {"image": img, "label": lab}
+
+    def __len__(self):
+        return len(self.image_files)
+
+
+
+class ImageDataset_GCN_Fundus(Dataset):
+    def __init__(self, root, transforms_=None):
+        self.transform = transforms.Compose(transforms_)
+        self.image_files = sorted(glob.glob(root + "/image/*.*"))
+        self.label_files = sorted(glob.glob(root + "/label/*.*"))
+
+    def __getitem__(self, index):
+        img = Image.open(self.image_files[index % len(self.image_files)])
+        lab = Image.open(self.label_files[index % len(self.label_files)]).convert("L")
+
+        # shape = 584,565 -> 512,512
+        img = np.array(img.resize([512,512]))
+        lab = np.array(lab.resize([512,512]))
+
+        img = self.transform(img)
+        lab = self.transform(lab)
+        
+        # lab = np.stack((lab, lab, lab), axis=-1)
+        return {"image": img, "label": lab}
+
+    def __len__(self):
+        return len(self.image_files)
+
+
+class ImageDataset_GCN_OCTA(Dataset):
+    def __init__(self, root, transforms_=None):
+        self.transform = transforms.Compose(transforms_)
+        self.image_files = sorted(glob.glob(root + "/image/*.*"))
+        self.label_files = sorted(glob.glob(root + "/label/*.*"))
+
+    def __getitem__(self, index):
+        img = cv2.imread(self.image_files[index % len(self.image_files)], cv2.IMREAD_GRAYSCALE)
+        lab = cv2.imread(self.label_files[index % len(self.label_files)], cv2.IMREAD_GRAYSCALE)
+
+        # Shape resize
+        # # For Swin-Unet
+        # img = cv2.resize(img, (224,224))
+        # lab = cv2.resize(lab, (224,224))
+        
+        # # For OCTA500
+        # img = cv2.resize(img, (384,384))
+        # lab = cv2.resize(lab, (384,384))
+
+        # img = np.stack((img, img, img), axis=-1) # Swin-Unet & Segformer
+        img = self.transform(img)
+        lab = self.transform(lab)
+        
+        return {"image": img, "label": lab}
+
+    def __len__(self):
+        return len(self.image_files)
+
+
+class ImageDataset_GCN_2PFM(Dataset):
+    def __init__(self, root, transforms_=None):
+        self.transform = transforms.Compose(transforms_)
+        self.image_files = sorted(glob.glob(root + "/image/*.*"))
+        self.label_files = sorted(glob.glob(root + "/label/*.*"))
+
+    def __getitem__(self, index):
+        img = cv2.imread(self.image_files[index % len(self.image_files)], cv2.IMREAD_GRAYSCALE)
+        lab = cv2.imread(self.label_files[index % len(self.label_files)], cv2.IMREAD_GRAYSCALE)
+
+        # Shape resize
+        # # For Swin-Unet
+        # img = cv2.resize(img, (224,224))
+        # lab = cv2.resize(lab, (224,224))
+        
+        # img = np.stack((img, img, img), axis=-1) # Swin-Unet & Segformer
         img = self.transform(img)
         lab = self.transform(lab)
         
